@@ -1,4 +1,4 @@
-# CMSI281
+import java.util.*;
 /**     
 
     <b>Note: Corrections have been made to the return types for both toArray() methods. (2015-10-13).</b>
@@ -26,7 +26,7 @@ public class NumberList implements java.util.Collection {
 		numList = new Long [l.length];
 		numSize = l.length;
 		for(int i =0; i<numSize; i++) {
-			this.numList[i] = l[i];
+			numList[i] = l[i];
 		}
 		//The big O for the method is n
 	}
@@ -43,25 +43,25 @@ public class NumberList implements java.util.Collection {
     
 
     public boolean add( Object obj ) {
-		if (obj instanceof Long) {
+
+	if (obj instanceof Long) {
 			if (obj != null) {				
-				if (numSize==listSize) {
-					Long[] copyNumList = new Long[this.listSize];
-					copyNumList = numList;
+				if (numList.length==this.listSize) {
+					Long copyNumList[] = this.numList;
+//					copyNumList = this.numList;
 					listSize = this.listSize * 2;
 					Long[] numList = new Long[this.listSize];
 					numList = copyNumList;
 					numList[numSize+1]= (long)obj;
-					numSize++;
+					this.numSize++;
 					return true;
 				} else {
 					numList[numSize+1] = (long)obj;
 					numSize++;
-					return false;
 				}
 			}
 		}
-		return false;
+		return true;
 		//The big O for the method is 1
     }
 	
@@ -92,7 +92,7 @@ public class NumberList implements java.util.Collection {
  
 	
     public boolean contains ( Object obj ) {
-		for (int i=0; i<numSize; i++) {
+		for (int i=0; i<numList.length; i++) {
 			if (obj == this.numList[i]) {
 				return true;
 			} 
@@ -103,32 +103,39 @@ public class NumberList implements java.util.Collection {
  
 
     public boolean containsAll ( java.util.Collection c ) {
-		NumberList collArray = new NumberList(c);
-		for (int i=0; i<collArray.numList.length; i++) {
-			if (!this.contains(collArray.numList[i])) {
-				return false;
-			}
-		}
-		return true;
+
+       Object[] arrayNum;
+        arrayNum = c.toArray();
+        
+        for (int i = 0; i < arrayNum.length; i++) {
+            if (!(this.contains(arrayNum[i]))) {
+                return false;
+            }
+        }
+
+        return true;
 		//The big O for the method is n^2
 	}
  
 
     public boolean equals ( Object obj ) {
+		boolean output = false;
 		if (obj instanceof Long) {
 			if (obj != null) {	
-				for (int i=0; i<numSize; i++) {
-					if (obj != this.numList[i]) {
-						return false;
+				for (int i=0; i<numList.length; i++) {
+					if (obj == this.numList[i]) {
+						output = true;
+					} else {
+						output = false;
 					}
 				}
 			} else {
-				return false;
+				output = false;			
 			}
-			return true;
 		} else {
-			return false;
-		}
+			output = false;
+		} 
+		return output;
 		//The big O for the method is 1    
 	}
  
@@ -162,7 +169,7 @@ public class NumberList implements java.util.Collection {
 
 
     public boolean remove ( Object obj ) {
-		for (int i=0; i<numSize; i++) {
+		for (int i=0; i<numList.length; i++) {
 			if (obj == this.numList[i]) {
 				numList[i] = null;
 				return true;
@@ -174,10 +181,12 @@ public class NumberList implements java.util.Collection {
 
 
 	public boolean removeAll ( java.util.Collection c ) {
-		NumberList collArray = new NumberList(c);
-		for (int i=0; i<collArray.numList.length; i++) {
-			if (this.contains(collArray.numList[i])) {
-				this.remove(collArray.numList[i]);
+		Object[] collArray;
+		
+		collArray = c.toArray();
+		for (int i=0; i<collArray.length; i++) {
+			if (this.contains(collArray[i])) {
+				this.remove(collArray[i]);
 			} 
 		}
 		return false;
@@ -186,10 +195,11 @@ public class NumberList implements java.util.Collection {
 
 
 	public boolean retainAll ( java.util.Collection c ) {
-		NumberList collArray = new NumberList(c);
-		for (int i=0; i<collArray.numList.length; i++) {
-			if (!this.contains(collArray.numList[i])) {
-				this.remove(collArray.numList[i]);
+		Object[] collArray;
+		collArray = c.toArray();
+		for (int i=0; i<collArray.length; i++) {
+			if (!this.contains(collArray[i])) {
+				this.remove(collArray[i]);
 			} 
 		}
 		return false;
@@ -224,14 +234,16 @@ public class NumberList implements java.util.Collection {
     public int size () {
 		Long[] compA= new Long[this.listSize];
 		int size = 0;
-		for (int i=0; i<this.listSize; i++) {
-			for (int i1=0; i1<i; i1+=0) {
-				if(this.numList[i]==compA[i1]){
-					break;
+		for (int i=0; i<numList.length; i++) {
+			for (int i1=i+1; i1<numList.length; i1++) {
+				if(numList[i]==numList[i1]){
+					numList[i1]=null;
 				} 
-				compA[i1] = numList[i];
-				i1++;
-				size = size + i1;
+			}
+		}
+		for (int i=0; i<numList.length; i++) {
+			if (numList[i] != null) {
+				size++;
 			}
 		}
 		return size;
@@ -240,25 +252,38 @@ public class NumberList implements java.util.Collection {
 
 
     public int count ( Object obj ) {
-		int count = 0;
-		for (int i=0; i<numSize; i++) {
+/*		int count = 0;
+		for (int i=0; i<numList.length; i++) {
 			if (obj == numList[i]) {
 				count++;
 			}
 		}
 		return count;
 		//The big O for the method is n		
-    }
+*/
+       Long obj1 = Long.parseLong(obj.toString());
+        int count = 0;
+
+        for (int i = 0; i < numList.length; i++) {
+            if (numList[i] != null && numList[i].equals(obj1)) {
+                count++;
+            }
+        }
+
+        return count; 
+	}
 
 	
 	public String toString () { // overrides Object.toString()
+
 		String s = "[";
-		for (int i = 0; i<numSize; i++) {
+		for (int i = 0; i<numList.length; i++) {
 			s = s + numList[i] + ",";
 		}
 		s = s.substring(0,s.length()-1);
 		s = s + "]";
 		return s;
+
 		//The big O for the method is n			
     }
 	
@@ -275,7 +300,9 @@ public class NumberList implements java.util.Collection {
 
 
     public static void main (String[] args) {
-/*		System.out.println( (new NumberList()).add(1) );
+    
+	
+		System.out.println( (new NumberList()).add(1) );
 		System.out.println( (new NumberList()).contains(2) );
 		System.out.println( (new NumberList()).equals(3) );
 		System.out.println( (new NumberList()).hashCode() );
@@ -286,7 +313,6 @@ public class NumberList implements java.util.Collection {
 		System.out.println( (new NumberList()).size() );
 		System.out.println( (new NumberList()).count(5) );
 		System.out.println( (new NumberList()).toString() );
-*/
 
 		Long[] test = {(long) 1, (long) 2};
 		NumberList nl = new NumberList(test);
@@ -297,7 +323,7 @@ public class NumberList implements java.util.Collection {
 		nl1.add(test[0]);
 		//		nl1.addAll(nl);
 		System.out.println(nl1.toString());
-	
+
 	}
 	   
 }
