@@ -1,64 +1,96 @@
-# CMSI281
-import java.util.*;
+public class BaseConverter{
 
-public class BaseConverter {  
- 
-    /* This method attempts to validate the command-line arguments. If they're
-        okay, it returns true; otherwise, it returns false. */
-    
-    public static boolean validArgs ( String[] args ) {
-  //        throw new UnsupportedOperationException(); // for no
+	public static boolean validArgs( String[] args ) {
+        
+        if ( args.length < 2 ) {	
+        	return false;
+        }
+       	if ( !isNumeric(args[1]) ){	
+       		return false;
+       	}
+       	if ( args.length == 3 && !isNumeric(args[2]) ) {	
+       		return false;
+       	}
+       	Long baseA = new Long(args[1]);
+       	if (args.length == 3) {
+       		Long baseB = new Long(args[2]);
+       		if ( baseA - 2 < 0 ) {		
+       			return false;
+       		}
+       		if ( baseB - 2 < 0) {			
+       			return false;
+       		}
+       	}
 
-
-		long[]num1 = Arrays.stream(args[0].substring(1,args[0].length()-1).split("]\\[")).mapToLong(Long::parseLong).toArray();
-		long Base4 = Long.parseLong(args[2]);	
-		long Base3 = Long.parseLong(args[1]);	
-		for (int co = 0; co <= num1.length-1; co++) {
-			if (num1[co] >= Base3 || num1[co]<0) {
+		String str = args[0];
+		str = str.replaceAll("\\[", "").replaceAll("\\]","-");
+		String[] original = str.split("-");
+		for ( int i = 0; i < original.length; i++ ) {			
+			if ( !isNumeric(original[i]) ){
 				return false;
 			}
 		}
-		return args[1].matches("\\d+");
-
+        return true;
     }
-    
-    
-    
-    /** This method calls validArgs() to check the command-line arguments and, if they're valid, 
-        it takes care of the conversion and outputs the result. */
-    
-    public static void main ( String[] args ) {
-		System.out.println("Please input the converting number in the form of [1][2][32] 34 16");
-		long[]num = Arrays.stream(args[0].substring(1,args[0].length()-1).split("]\\[")).mapToLong(Long::parseLong).toArray();
-		long Base1 = Long.parseLong(args[1]);
-		long Base2 = Long.parseLong(args[2]);	
-		for (int co = 0; co <= num.length-1; co++) {
-			if (num[co] >= Base1 || num[co]<0) {
-				System.out.println("Invalid Input!!! Try agian following the given form");
+	
+	public static void main ( String[] args ) {
+       if ( ! validArgs ( args ) ) {
+           throw new IllegalArgumentException();
+        }
+        else {
+            Long baseB;
+			String str = args[0];
+			str = str.replaceAll("\\[", "").replaceAll("\\]","-");
+			String[] original = str.split("-");
+			Long baseA = new Long(args[1]);
+			if ( args.length != 3 ) {
+				baseB = new Long(10);
+			} else {
+				baseB = new Long(args[2]);
 			}
+			Long number10 = new Long("16");
+			System.out.println( baseTenToN( toBaseTen(original,baseA), baseB) );
+        }
+    }
+
+	public static Long toBaseTen( String[] original, Long baseAinal ) {
+		Long decVal = new Long(0);
+		int i = 0;
+		while ( i < original.length ) {
+			if ( Long.valueOf(original[i]) < 0 ) {
+				throw new UnsupportedOperationException();			
+			}
+			if ( Long.valueOf(original[i]) >= baseAinal ) {
+				throw new UnsupportedOperationException();			
+			}
+			decVal = decVal * baseAinal + Long.valueOf(original[i]);
+			i++;
 		}
-		long SumNum = 0;
-		for (int i = 0; i <= num.length-1; i++) {
-			SumNum = SumNum + (long)Math.pow(Base1,i) * num[num.length-1-i];
-		}
-		ArrayList <Long>ResNum = new ArrayList<>();
-		while (SumNum != 0) {
-			long DivNum = 0;
-			long RemNum = 0;
-			ResNum.add(SumNum % Base2);
-			Collections.reverse(ResNum);			
-			SumNum = SumNum/Base2;
-		}
-//converting back to string
-		String outputNum = "";
-		for (int i1 = 0; i1 < ResNum.size(); i1++) {
-		outputNum = outputNum + "["+ResNum.get(i1)+"]";
-		}
-		System.out.println(outputNum);
+		return decVal;
 	}
 
+	public static String baseTenToN( Long decVal, Long baseB ) {
+		String result = "";
+		Long number1 = new Long(0);
+		while ( decVal > 1 ) {
+			number1 = decVal % baseB;
+			result = "["+ number1 +"]"+ result;
+			decVal = decVal / baseB;
+		}
+		if ( decVal != 0 ) {
+			result = "[" + decVal +"]" + result;
+		}
+		return result;
+	}
+
+
+    public static boolean isNumeric( String str )  {  
+  		try  {  
+    		double d = Double.parseDouble(str);  
+  		}  
+  		catch(NumberFormatException nfe)  {  
+    		return false;  
+  		}  
+  		return true;  
+	}
 }
-
-
-
-
